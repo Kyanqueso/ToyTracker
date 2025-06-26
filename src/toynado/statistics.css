@@ -1,0 +1,68 @@
+#stat-header{
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0.3, 2, 2);
+    -fx-letter-spacing: 3px;
+    -fx-padding: 20px;
+}
+#summaryHead{
+    -fx-font-size: 25px;
+    -fx-font-weight: bold;
+    -fx-padding-top: 30px;
+    -fx-padding-bottom: 30px;
+}
+#summary{
+    -fx-font-size: 16px;
+    -fx-padding: 20px;
+    -fx-font-weight: normal;
+}
+.separator {
+    -fx-background-color: #000000;
+}
+#box1, #box2, #box3, #box4, #box5{
+    -fx-background-color: skyblue;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+}
+
+/*Chart Design*/
+.chart-series-line {
+    -fx-stroke: #4A90E2;
+    -fx-stroke-width: 2px;
+}
+
+.chart-legend-item-symbol {
+    -fx-background-color: #4A90E2, white;
+}
+
+.chart {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+    -fx-border-color: transparent;
+}
+
+.chart-plot-background {
+    -fx-background-color: #eeecec;
+}
+.axis {
+    -fx-tick-label-fill: #333;
+    -fx-label-fill: #333;
+}
+/*end of chart design*/
+
+#contact-head{
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 2em;
+    -fx-padding: 10 0 10 0;
+}
+#email, #fb, #linkedin{
+    -fx-text-fill: white;
+    -fx-font-size: 1em;
+    -fx-padding: 5px; 
+    
+}
+#linkedin{
+    -fx-padding: 7.5 0 10 0;
+}

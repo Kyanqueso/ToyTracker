@@ -1,0 +1,55 @@
+#AddID{
+    -fx-background-color: #F97316; 
+    -fx-text-fill: black;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+}
+#AddID:hover {
+    -fx-background-color: #de884e;
+}
+#EditID{
+    -fx-background-color: #84CC16; 
+    -fx-text-fill: black;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+}
+#EditID:hover {
+    -fx-background-color: #98d63a;
+}
+#DeleteID{
+    -fx-background-color: #DF2828; 
+    -fx-text-fill: black;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+}
+#DeleteID:hover {
+    -fx-background-color: #de4747;
+}
+#ImpID{
+    -fx-background-color: #7B6F6F; 
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+}
+#ImpID:hover {
+    -fx-background-color: #8f8b8b;
+}
+#ExpID{
+    -fx-background-color: #4B4848; 
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+}
+#ExpID:hover {
+    -fx-background-color: #121111;
+}

@@ -1,0 +1,22 @@
+.menu-bar {
+    -fx-background-color: #383535; 
+    -fx-font-size: 1.2em;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-padding: 10px;
+}
+.menu-bar Label:hover {
+    -fx-text-fill: #FFD700; /* Change text color on hover (gold) */
+}
+.exit-button {
+    -fx-background-color: #D32F2F; /* Red */
+    -fx-text-fill: white; /* White text */
+    -fx-font-weight: bold;
+    -fx-padding: 5px 15px;
+    -fx-background-radius: 5px;
+    -fx-border-color: white;
+    -fx-border-width: 2px;
+}
+.exit-button:hover {
+    -fx-background-color: #B71C1C; /* Darker Red */
+}

@@ -1,0 +1,49 @@
+#header-label {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0.3, 2, 2);
+    -fx-letter-spacing: 3px;
+    -fx-padding: 20px;
+}
+#button-container {
+    -fx-alignment: center;
+    -fx-padding: 5px;
+    -fx-background-color: skyblue;
+    -fx-background-radius: 10px;
+}
+#info-container {
+    -fx-background-color: #FFFDD0;
+    -fx-border-color: black;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 15;
+}
+#info-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: black;
+}
+#addToyButton {
+    -fx-background-color: #F97316; 
+    -fx-text-fill: black;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+}
+#addToyButton:hover {
+    -fx-scale-x: 1.1; 
+    -fx-scale-y: 1.1; 
+}
+#viewTableButton {
+    -fx-background-color: #84CC16; 
+    -fx-text-fill: black;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+}
+#viewTableButton:hover {
+    -fx-scale-x: 1.1; 
+    -fx-scale-y: 1.1; 
+}
