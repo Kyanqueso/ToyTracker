@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper {
-    // SQLite connection URL
+    
     private static final String DB_URL = "jdbc:sqlite:toynado.db";  // Path to your database file
 
-    // Method to establish connection to the SQLite database
     public static Connection connect() {
         try {
             return DriverManager.getConnection(DB_URL);
@@ -35,7 +34,8 @@ public class DatabaseHelper {
                 balance REAL,
                 fully_paid TEXT CHECK(fully_paid IN ('YES','NO')) NOT NULL,
                 barcode TEXT,
-                image_path TEXT
+                image_path TEXT,
+                selected INTEGER DEFAULT 0
             );
         """;
 
@@ -48,11 +48,9 @@ public class DatabaseHelper {
         }
     }
     public static boolean addToy(Toy toy) {
-        String sql = """
-            INSERT INTO toys(name, date_order, date_receive, brand_name, category, supplier, 
-                             amount, downpayment, discount, balance, fully_paid, barcode, image_path)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """;
+        String sql = "INSERT INTO toys (name, date_order, date_receive, brand_name, category, "
+                + "supplier, amount, downpayment, discount, balance, fully_paid, barcode, image_path) " +
+             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, toy.getName());
@@ -97,7 +95,7 @@ public class DatabaseHelper {
             pstmt.setString(11, toy.getFullyPaid());
             pstmt.setString(12, toy.getBarcode());
             pstmt.setString(13, toy.getImagePath());
-            pstmt.setInt(14, toy.getId());          
+            pstmt.setInt(14, toy.getId());   
             pstmt.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -118,8 +116,10 @@ public class DatabaseHelper {
             return false;
         }
     }
-    // for testing purposes
-    public static void resetAutoIncrement() {
+    
+    
+    // for testing purposes (will comment out)
+    /*public static void resetAutoIncrement() {
         String sql = "DELETE FROM sqlite_sequence WHERE name='toys'";
         try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
             stmt.executeUpdate(sql);
@@ -127,7 +127,9 @@ public class DatabaseHelper {
         } catch (SQLException e) {
             System.out.println("Failed to reset auto-increment: " + e.getMessage());
         }
-    }
+    }*/
+    
+    
     public static Toy getToyById(int id) {
         String sql = "SELECT * FROM toys WHERE id = ?";
 
@@ -186,6 +188,7 @@ public class DatabaseHelper {
                     rs.getString("barcode"),
                     rs.getString("image_path")
                 );
+                toy.setSelected(rs.getInt("selected") == 1);
                 toys.add(toy);
             }
 
@@ -223,61 +226,6 @@ public class DatabaseHelper {
         }
         return null;
     }
-    /*private void insertToyIntoDatabase(Toy toy) {
-        String sql = "INSERT INTO toys (id, name, dateOrder, dateReceive, brandName, category, supplier, amount, downpayment, discount, balance, fullyPaid, barcode) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, toy.getId());
-            pstmt.setString(2, toy.getName());
-            pstmt.setString(3, toy.getDateOrder());
-            pstmt.setString(4, toy.getDateReceive());
-            pstmt.setString(5, toy.getBrandName());
-            pstmt.setString(6, toy.getCategory());
-            pstmt.setString(7, toy.getSupplier());
-            pstmt.setDouble(8, toy.getAmount());
-            pstmt.setDouble(9, toy.getDownpayment());
-            pstmt.setDouble(10, toy.getDiscount());
-            pstmt.setDouble(11, toy.getBalance());
-            pstmt.setString(12, toy.getFullyPaid());
-            pstmt.setString(13, toy.getBarcode());
-
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }*/
-    /*public static void ensureImagePathColumnExists() {
-        String checkColumnSQL = "PRAGMA table_info(toys)";
-        String alterTableSQL = "ALTER TABLE toys ADD COLUMN image_path TEXT";
-
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(checkColumnSQL)) {
-
-            boolean columnExists = false;
-
-            while (rs.next()) {
-                if ("image_path".equalsIgnoreCase(rs.getString("name"))) {
-                    columnExists = true;
-                    break;
-                }
-            }
-
-            if (!columnExists) {
-                stmt.execute(alterTableSQL);
-                System.out.println("✅ 'image_path' column added.");
-            } else {
-                System.out.println("✅ 'image_path' column already exists.");
-            }
-
-        } catch (SQLException e) {
-            System.out.println("❌ Failed to check/add column: " + e.getMessage());
-        }
-    }*/
-    //
     public static boolean deleteAll(){
         String sql = "DELETE from toys";
         
@@ -287,6 +235,18 @@ public class DatabaseHelper {
         } catch (Exception e) {
             System.out.println(e.getStackTrace());
             return false;
+        }
+    }
+    public static void updateToySelected(int toyId, boolean isSelected) {
+        String sql = "UPDATE toys SET selected = ? WHERE id = ?";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, isSelected ? 1 : 0);
+            pstmt.setInt(2, toyId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

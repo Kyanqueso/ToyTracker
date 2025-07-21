@@ -1,5 +1,8 @@
 package model;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 public class Toy {
     private int id;
     private String name;
@@ -15,6 +18,7 @@ public class Toy {
     private String fullyPaid;
     private String barcode;
     private String imagePath;
+    private BooleanProperty selected = new SimpleBooleanProperty(false);
 
     // Constructor, Getters, and Setters
     public Toy(int id, String name, String dateOrder, String dateReceive,
@@ -35,6 +39,7 @@ public class Toy {
         this.fullyPaid = fullyPaid;
         this.barcode = barcode;
         this.imagePath = imagePath;
+        this.selected.set(false);
     }
     
     public int getId() {
@@ -120,5 +125,20 @@ public class Toy {
     }
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+    public int getSelected() {
+        return selected.get() ? 1 : 0;
+       
+}
+    public boolean isSelected() {
+        return selected.get();
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected.set(selected);
+    }
+
+    public BooleanProperty selectedProperty() {
+        return selected;
     }
 }

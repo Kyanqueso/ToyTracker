@@ -26,6 +26,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.Scene;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -37,6 +38,7 @@ import static model.DatabaseHelper.*;
 public class Toynado extends Application {
     protected BorderPane rootLayout;
     protected TableView<Toy> tableView;
+    protected Label totalSelectedLabel;
     @Override
     public void start(Stage primaryStage) {
         
@@ -68,7 +70,7 @@ public class Toynado extends Application {
         exit.setOnAction(e -> showExitConfirmation(primaryStage));
         
         //Reset auto increment button, will delete later!!!
-        /**Button resetIdButton = new Button("Reset ID Counter");
+        /*Button resetIdButton = new Button("Reset ID Counter");
         resetIdButton.setOnAction(e -> {
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setTitle("Confirm Reset");
@@ -85,7 +87,7 @@ public class Toynado extends Application {
                     info.showAndWait();
                 }
             });
-        }); **/
+        });*/
         // until here to delete soon or just comment out
         
         // Spacer for alignment
@@ -204,7 +206,7 @@ public class Toynado extends Application {
         edit.setPrefSize(180, 40);
         edit.setOnAction(e -> openEditForm(tableView));
 
-        Button delete = new Button("Delete");
+        Button delete = new Button("Delete All");
         delete.setId("DeleteID");
         delete.setPrefSize(180, 40);
         delete.setOnAction(e -> openDeleteForm(this));
@@ -355,7 +357,21 @@ public class Toynado extends Application {
             supplierCol, amountCol, downpaymentCol, discountCol, balanceCol, paidCol, barcodeCol
         );
         
+        //Checkbox
+        TableColumn<Toy, Boolean> selectCol = new TableColumn<>("✔");
+        selectCol.setCellValueFactory(cellData -> cellData.getValue().selectedProperty());
+
+        selectCol.setCellFactory(CheckBoxTableCell.forTableColumn(selectCol));
+        selectCol.setEditable(true); 
+        tableView.setEditable(true); 
+            
+        tableView.getColumns().add(0, selectCol); // Add at the beginning
+        
+        totalSelectedLabel = new Label("Total Selected Balance : PHP0.0");
+        
+        //Trash Icon
         TableColumn<Toy, Void> deleteCol = new TableColumn<>("Delete");
+        deleteCol.setId("delete2");
         deleteCol.setCellFactory(col -> new TableCell<>() {
             protected final Button deleteBtn = new Button("🗑");
 
@@ -427,10 +443,23 @@ public class Toynado extends Application {
         buttonBox2.getChildren().addAll(imp, exp);
         
         // Add components to the main VBox
-        tablePage.getChildren().addAll(tableLabel, buttonBox1, filterBarWrapper, tableView, buttonBox2);
+        tablePage.getChildren().addAll(tableLabel, buttonBox1, filterBarWrapper, tableView, totalSelectedLabel, buttonBox2);
 
         rootLayout.setCenter(tablePage);
-        loadToysIntoTable(tableView);
+        ObservableList<Toy> toyList = loadToysIntoTable(tableView);
+        setupBalanceSumListener(toyList);
+        
+        //double click to show toy details
+        tableView.setRowFactory(tv -> {
+            TableRow<Toy> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (!row.isEmpty() && event.getClickCount() == 2) {
+                    showToyDetails(row.getItem());
+                }
+            });
+            return row;
+        });
+
     }
     protected void showStatsPage(){
         Label header = new Label("Statistics");
@@ -669,7 +698,8 @@ public class Toynado extends Application {
                 String dateOrder = dateOrderPicker.getValue() != null ? dateOrderPicker.getValue().toString() : "";
                 String dateReceive = dateReceivePicker.getValue() != null ? dateReceivePicker.getValue().toString() : "";
                 String paid = paidBox.getValue();
-                String imgPath = imagePath[0]; // Can be null if user didn't upload
+                String imgPath = imagePath[0];
+                //int unchecked = 0;
 
                 Toy toy = new Toy(0, name, dateOrder, dateReceive, brand, category, supplier,
                         amount, downpayment, discount, balance, paid, barcode, imgPath);
@@ -688,9 +718,16 @@ public class Toynado extends Application {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to add toy.");
                     alert.showAndWait();
                 }
-            } catch (Exception ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid input: " + ex.getMessage());
+            } catch (NumberFormatException nfe) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Please ensure that amount, downpayment, and discount fields are valid numbers.");
                 alert.showAndWait();
+            } catch (IllegalArgumentException iae) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, iae.getMessage());
+                alert.showAndWait();
+            } catch (Exception ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected error: " + ex.getMessage());
+                alert.showAndWait();
+                ex.printStackTrace();
             }
         });
         // Layout
@@ -749,7 +786,7 @@ public class Toynado extends Application {
                     alert.showAndWait();
                     return;
                 }
-
+                stage.close();
                 // New stage for edit form
                 Stage editStage = new Stage();
                 VBox form = new VBox(10);
@@ -805,6 +842,10 @@ public class Toynado extends Application {
 
                 saveBtn.setOnAction(ev -> {
                     try {
+                        
+                        if (dateOrderPicker.getValue() == null || dateReceivePicker.getValue() == null) {
+                            throw new IllegalArgumentException("Please fill in both order and receive dates.");
+                        }
                         toy.setName(nameField.getText());
                         toy.setBrandName(brandField.getText());
                         toy.setCategory(categoryField.getText());
@@ -869,38 +910,67 @@ public class Toynado extends Application {
                 editStage.show();
 
             } catch (NumberFormatException nfe) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid ID input.");
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Please ensure that amount, downpayment, and discount fields are valid numbers.");
                 alert.showAndWait();
+            } catch (IllegalArgumentException iae) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, iae.getMessage());
+                alert.showAndWait();
+            } catch (Exception ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected error: " + ex.getMessage());
+                alert.showAndWait();
+                ex.printStackTrace(); 
             }
         });
     }
     //Delete All Form when clicked
     public static void openDeleteForm(Toynado app) {
         Stage stage = new Stage();
-        VBox root = new VBox(10);
-        root.setPadding(new Insets(15));
+        stage.setTitle("Confirm Deletion");
 
-        Label confirm = new Label("Are you sure you want to delete all?");
-        
-        Button noDelete = new Button("No");
-        noDelete.setOnAction(e -> stage.close());
-        //noDelete.setId("noDelete");
-        Button yesDelete = new Button("Yes");
-        //yesDelete.setId("yesDelete");
-        root.getChildren().addAll(confirm, noDelete, yesDelete);
-        
-        yesDelete.setOnAction(e -> { 
-            try {
-                DatabaseHelper.deleteAll();
-                stage.close();
-            } catch (Exception e1) {
-                e1.printStackTrace();
+        VBox root = new VBox(20);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        Label confirm = new Label("Are you sure you want to delete all toys?");
+        confirm.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+
+        Button cancelButton = new Button("No");
+        Button deleteButton = new Button("Yes");
+
+        // Cancel closes the window
+        cancelButton.setOnAction(e -> stage.close());
+
+        // Yes triggers second confirmation
+        deleteButton.setOnAction(e -> {
+            Alert confirmAgain = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmAgain.setTitle("Final Confirmation");
+            confirmAgain.setHeaderText("This action is irreversible!");
+            confirmAgain.setContentText("Are you absolutely sure you want to delete ALL toy records?");
+
+            Optional<ButtonType> result = confirmAgain.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                try {
+                    DatabaseHelper.deleteAll();
+                    app.showTablePage();
+                    stage.close();
+                } catch (Exception ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Deletion Failed");
+                    alert.setContentText("An error occurred while trying to delete all toys.");
+                    alert.showAndWait();
+                    ex.printStackTrace();
+                }
             }
         });
+
+        HBox buttons = new HBox(10, cancelButton, deleteButton);
+        buttons.setAlignment(Pos.CENTER);
+
+        root.getChildren().addAll(confirm, buttons);
+
         Scene scene = new Scene(root);
-        root.setAlignment(Pos.CENTER);
         stage.setScene(scene);
-        stage.setTitle("Delete Toy");
         stage.show();
     }
     //alert box when delete
@@ -930,7 +1000,7 @@ public class Toynado extends Application {
         });
     }
     //Display data in table
-    protected void loadToysIntoTable(TableView<Toy> tableView) {
+    protected ObservableList<Toy> loadToysIntoTable(TableView<Toy> tableView) {
         ObservableList<Toy> toys = FXCollections.observableArrayList();
 
         String sql = "SELECT * FROM toys";
@@ -956,24 +1026,16 @@ public class Toynado extends Application {
                     rs.getString("barcode"),
                     rs.getString("image_path")
                 );
+                toy.setSelected(rs.getInt("selected") == 1); // load saved checkbox state
                 toys.add(toy);
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         tableView.setItems(toys);
-        
-        tableView.setRowFactory(tv -> {
-            TableRow<Toy> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if (!row.isEmpty() && event.getClickCount() == 1) {
-                    Toy clickedToy = row.getItem();
-                    showToyDetails(clickedToy);
-                }
-            });
-            return row;
-        });
+        return toys;
     }
     //Show Toy Details when clicked
     protected void showToyDetails(Toy toy) {
@@ -1103,6 +1165,37 @@ public class Toynado extends Application {
             return LocalDate.parse(dateStr); // Or use a custom formatter if needed
         } catch (DateTimeParseException e) {
             return null;
+        }
+    }
+    private void setupBalanceSumListener(ObservableList<Toy> toyList) {
+        double[] currentSum = {0};
+
+        // 1. Compute initial balance for already selected toys
+        for (Toy toy : toyList) {
+            if (toy.isSelected()) {
+                currentSum[0] += toy.getBalance();
+            }
+        }
+
+        // 2. Set initial label
+        totalSelectedLabel.setText(String.format("Total Selected Balance: ₱%.2f", currentSum[0]));
+
+        // 3. Add listener to each toy for live updates
+        for (Toy toy : toyList) {
+            toy.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+                double balance = toy.getBalance();
+
+                if (isNowSelected) {
+                    currentSum[0] += balance;
+                } else {
+                    currentSum[0] -= balance;
+                }
+
+                totalSelectedLabel.setText(String.format("Total Selected Balance: ₱%.2f", currentSum[0]));
+
+                // Save change to DB
+                DatabaseHelper.updateToySelected(toy.getId(), isNowSelected);
+            });
         }
     }
 }

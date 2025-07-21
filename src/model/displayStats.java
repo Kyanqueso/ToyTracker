@@ -23,7 +23,7 @@ public class displayStats {
         return "0";
     }
     public static String getTotalAmount(){
-        String query = "select SUM(amount) from toys";
+        String query = "select SUM(balance) from toys";
         try (Connection conn = DatabaseHelper.connect()) {
             PreparedStatement pst = conn.prepareStatement(query);
             ResultSet rs = pst.executeQuery();
@@ -38,14 +38,14 @@ public class displayStats {
         return "0";
     }
     public static String getMostExpensive(){
-        String query = "select name, amount from toys where amount = (SELECT MAX(amount) FROM toys)";
+        String query = "select name, balance from toys where balance = (SELECT MAX(balance) FROM toys)";
         try (Connection conn = DatabaseHelper.connect()){
             PreparedStatement pst = conn.prepareStatement(query);
             ResultSet rs = pst.executeQuery();
             
             if(rs.next()){
                 String name = rs.getString("name");
-                int amount = rs.getInt("amount");
+                int amount = rs.getInt("balance");
                 return name + " (PHP" + amount + ")";
             }
         } catch (Exception e) {
