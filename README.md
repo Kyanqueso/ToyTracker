@@ -20,6 +20,7 @@
 ## Database Schema
 
 Database File: toynado.db
+
 SQLite table: `toys`
 
 | Column         | Type    | Description                                            |
